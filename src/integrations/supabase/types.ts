@@ -14,7 +14,166 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      event_sites: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          event_id: string
+          id: string
+          sections: Json | null
+          styles: Json | null
+          theme: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          event_id: string
+          id?: string
+          sections?: Json | null
+          styles?: Json | null
+          theme?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          sections?: Json | null
+          styles?: Json | null
+          theme?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_sites_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          banner_url: string | null
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_published: boolean | null
+          name: string
+          slug: string
+          start_date: string
+          updated_at: string | null
+          user_id: string
+          venue: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_published?: boolean | null
+          name: string
+          slug: string
+          start_date: string
+          updated_at?: string | null
+          user_id: string
+          venue?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_published?: boolean | null
+          name?: string
+          slug?: string
+          start_date?: string
+          updated_at?: string | null
+          user_id?: string
+          venue?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      registrations: {
+        Row: {
+          created_at: string | null
+          email: string
+          event_id: string
+          form_data: Json | null
+          full_name: string
+          id: string
+          payment_id: string | null
+          payment_status: string | null
+          phone: string | null
+          ticket_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          event_id: string
+          form_data?: Json | null
+          full_name: string
+          id?: string
+          payment_id?: string | null
+          payment_status?: string | null
+          phone?: string | null
+          ticket_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          event_id?: string
+          form_data?: Json | null
+          full_name?: string
+          id?: string
+          payment_id?: string | null
+          payment_status?: string | null
+          phone?: string | null
+          ticket_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
