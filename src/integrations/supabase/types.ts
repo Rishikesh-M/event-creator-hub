@@ -179,7 +179,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      decrypt_text: {
+        Args: { encrypted_data: string; encryption_key: string }
+        Returns: string
+      }
+      encrypt_text: {
+        Args: { data: string; encryption_key: string }
+        Returns: string
+      }
+      get_event_registrations: {
+        Args: { encryption_key: string; event_uuid: string }
+        Returns: {
+          created_at: string
+          email: string
+          event_id: string
+          form_data: Json
+          full_name: string
+          id: string
+          payment_id: string
+          payment_status: string
+          phone: string
+          ticket_type: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
