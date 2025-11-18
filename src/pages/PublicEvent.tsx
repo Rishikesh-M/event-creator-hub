@@ -6,6 +6,8 @@ import { EventPreview } from "@/components/builder/EventPreview";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+
+
 const PublicEvent = () => {
   const { slug } = useParams();
   const [loading, setLoading] = useState(true);

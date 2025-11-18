@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { PlusCircle, Globe, Users, BarChart3, LogOut, Edit, Eye, Trash2 } from "lucide-react";
 import { Event } from "@/types/event";
 
+
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);

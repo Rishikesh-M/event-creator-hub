@@ -11,6 +11,8 @@ import { SectionEditor } from "@/components/builder/SectionEditor";
 import { ThemeSelector } from "@/components/builder/ThemeSelector";
 import { EventPreview } from "@/components/builder/EventPreview";
 
+
+
 const EventBuilder = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
@@ -87,23 +89,30 @@ const EventBuilder = () => {
   };
 
   const handlePublish = async () => {
-    if (!event) return;
+  if (!event) return;
+  setSaving(true);
 
-    try {
-      const { error } = await supabase
-        .from("events")
-        .update({ is_published: !event.is_published })
-        .eq("id", event.id);
+  try {
+    // 1. Update publish status in DB
+    const { error } = await supabase
+      .from("events")
+      .update({ is_published: !event.is_published })
+      .eq("id", event.id);
 
-      if (error) throw error;
+    if (error) throw error;
 
-      setEvent({ ...event, is_published: !event.is_published });
-      toast.success(event.is_published ? "Event unpublished" : "Event published!");
-    } catch (error: any) {
-      console.error("Error publishing:", error);
-      toast.error("Failed to update publish status");
-    }
-  };
+    setEvent({ ...event, is_published: !event.is_published });
+    toast.success(!event.is_published ? "Event published!" : "Event unpublished!");
+
+    // 2. Trigger Vercel deploy
+    await fetch("/api/deploy", { method: "POST" });
+
+  } catch (err) {
+    toast.error("Failed to publish event.");
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading) {
     return (
