@@ -215,7 +215,7 @@ const Dashboard = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(`/e/${event.slug}`, "_blank")}
+                            onClick={() => window.open(`/event/${event.slug}`, "_blank")}
                             disabled={!event.is_published}
                           >
                             <Eye className="h-4 w-4" />
