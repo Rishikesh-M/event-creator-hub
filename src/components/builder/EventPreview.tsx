@@ -1,16 +1,55 @@
 import { Event, EventSite } from "@/types/event";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { themes } from "@/lib/themes";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface Props {
   event: Event;
   site: EventSite;
+  isPublicView?: boolean;
 }
 
-export const EventPreview = ({ event, site }: Props) => {
+export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
   const theme = themes.find(t => t.id === site.theme);
   const colors = theme?.colors || themes[0].colors;
+  const [registrationForm, setRegistrationForm] = useState({
+    full_name: "",
+    email: "",
+    phone: ""
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleRegistrationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from("registrations")
+        .insert({
+          event_id: event.id,
+          full_name: registrationForm.full_name,
+          email: registrationForm.email,
+          phone: registrationForm.phone,
+          payment_status: "pending"
+        });
+
+      if (error) throw error;
+
+      toast.success("Registration submitted successfully!");
+      setRegistrationForm({ full_name: "", email: "", phone: "" });
+    } catch (error: any) {
+      console.error("Error submitting registration:", error);
+      toast.error("Failed to submit registration");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -78,24 +117,77 @@ export const EventPreview = ({ event, site }: Props) => {
                       {section.content.title || "Register for the Event"}
                     </h2>
                     <Card className="p-6">
-                      <div className="space-y-4">
-                        {(section.content.fields || []).map((field: any, i: number) => (
-                          <div key={i}>
+                      {isPublicView ? (
+                        <form onSubmit={handleRegistrationSubmit} className="space-y-4">
+                          <div>
                             <label className="block text-sm font-medium mb-2">
-                              {field.label} {field.required && "*"}
+                              Full Name *
                             </label>
-                            <input
-                              type={field.type}
-                              className="w-full px-3 py-2 border rounded-lg"
-                              placeholder={field.label}
-                              disabled
+                            <Input
+                              required
+                              value={registrationForm.full_name}
+                              onChange={(e) => setRegistrationForm({ ...registrationForm, full_name: e.target.value })}
+                              placeholder="Enter your full name"
                             />
                           </div>
-                        ))}
-                        <Button className="w-full" style={{ backgroundColor: colors.primary }}>
-                          Submit Registration
-                        </Button>
-                      </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Email *
+                            </label>
+                            <Input
+                              required
+                              type="email"
+                              value={registrationForm.email}
+                              onChange={(e) => setRegistrationForm({ ...registrationForm, email: e.target.value })}
+                              placeholder="Enter your email"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Phone
+                            </label>
+                            <Input
+                              value={registrationForm.phone}
+                              onChange={(e) => setRegistrationForm({ ...registrationForm, phone: e.target.value })}
+                              placeholder="Enter your phone number"
+                            />
+                          </div>
+                          {(section.content.fields || []).map((field: any, i: number) => (
+                            <div key={i}>
+                              <label className="block text-sm font-medium mb-2">
+                                {field.label} {field.required && "*"}
+                              </label>
+                              {field.type === "textarea" ? (
+                                <Textarea placeholder={field.placeholder || ""} />
+                              ) : (
+                                <Input type={field.type || "text"} placeholder={field.placeholder || ""} />
+                              )}
+                            </div>
+                          ))}
+                          <Button type="submit" className="w-full" disabled={submitting}>
+                            {submitting ? "Submitting..." : "Register Now"}
+                          </Button>
+                        </form>
+                      ) : (
+                        <div className="space-y-4">
+                          {(section.content.fields || []).map((field: any, i: number) => (
+                            <div key={i}>
+                              <label className="block text-sm font-medium mb-2">
+                                {field.label} {field.required && "*"}
+                              </label>
+                              <input
+                                type={field.type || "text"}
+                                placeholder={field.placeholder || ""}
+                                className="w-full px-3 py-2 border rounded-md"
+                                disabled
+                              />
+                            </div>
+                          ))}
+                          <p className="text-center text-sm text-muted-foreground">
+                            Registration form preview - functional on published site
+                          </p>
+                        </div>
+                      )}
                     </Card>
                   </div>
                 )}
