@@ -2,3 +2,6 @@ project_id = "fubeocwfevkfopcoavvp"
 
 [functions.submit-registration]
 verify_jwt = false
+
+[functions.send-registration-email]
+verify_jwt = false

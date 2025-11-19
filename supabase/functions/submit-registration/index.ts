@@ -25,13 +25,13 @@ serve(async (req) => {
     }
 
     // Validate that the event exists and is published
-    const { data: event, error: eventError } = await supabase
+    const { data: eventData, error: eventError } = await supabase
       .from('events')
-      .select('is_published')
+      .select('*')
       .eq('id', event_id)
       .single();
 
-    if (eventError || !event?.is_published) {
+    if (eventError || !eventData?.is_published) {
       return new Response(
         JSON.stringify({ error: 'Event not found or not published' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -87,6 +87,33 @@ serve(async (req) => {
     if (insertError) {
       console.error('Insert error:', insertError);
       throw insertError;
+    }
+
+    // Send confirmation email (don't fail registration if email fails)
+    try {
+      const emailResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-registration-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+        },
+        body: JSON.stringify({
+          email: email,
+          name: full_name,
+          eventName: eventData.name,
+          eventDate: eventData.start_date,
+          eventVenue: eventData.venue
+        })
+      });
+
+      if (!emailResponse.ok) {
+        console.error('Failed to send confirmation email, but registration succeeded');
+      } else {
+        console.log('Confirmation email sent successfully');
+      }
+    } catch (emailError) {
+      console.error('Error sending confirmation email:', emailError);
+      // Don't fail the registration if email fails
     }
 
     return new Response(
