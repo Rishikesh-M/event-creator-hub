@@ -58,6 +58,7 @@ export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
           {site.sections
             .filter(s => s.visible)
             .sort((a, b) => a.order - b.order)
+            .filter((s, idx, arr) => s.type !== "registration" || arr.findIndex(x => x.type === "registration") === idx)
             .map((section) => (
               <div key={section.id} className="border-b pb-8 last:border-0">
                 {section.type === "hero" && (
