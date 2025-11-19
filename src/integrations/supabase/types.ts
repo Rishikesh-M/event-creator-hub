@@ -53,6 +53,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "event_sites_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
         ]
       }
       events: {
@@ -172,11 +179,59 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      public_events: {
+        Row: {
+          banner_url: string | null
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string | null
+          is_published: boolean | null
+          name: string | null
+          slug: string | null
+          start_date: string | null
+          updated_at: string | null
+          venue: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string | null
+          is_published?: boolean | null
+          name?: string | null
+          slug?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+          venue?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string | null
+          is_published?: boolean | null
+          name?: string | null
+          slug?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+          venue?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       decrypt_text: {
