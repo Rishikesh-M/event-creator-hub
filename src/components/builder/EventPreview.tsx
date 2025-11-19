@@ -29,15 +29,15 @@ export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
     setSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from("registrations")
-        .insert({
+      const { error } = await supabase.functions.invoke('submit-registration', {
+        body: {
           event_id: event.id,
           full_name: registrationForm.full_name,
           email: registrationForm.email,
           phone: registrationForm.phone,
-          payment_status: "pending"
-        });
+          form_data: {}
+        }
+      });
 
       if (error) throw error;
 
