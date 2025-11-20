@@ -22,6 +22,15 @@ serve(async (req) => {
 
     console.log('Processing registration for event:', eventId);
 
+    // Validate required fields
+    if (!fullName || !email) {
+      console.error('Missing required fields:', { fullName, email });
+      return new Response(
+        JSON.stringify({ error: 'Full name and email are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Get event details and encryption key
     const { data: event, error: eventError } = await supabase
       .from('events')

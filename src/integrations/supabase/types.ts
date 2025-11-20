@@ -289,11 +289,11 @@ export type Database = {
           event_id: string
           form_data: Json
           full_name: string
-          id: string
           image_url: string
           payment_id: string
           payment_status: string
           phone: string
+          registration_id: string
           ticket_token: string
           ticket_type: string
         }[]
