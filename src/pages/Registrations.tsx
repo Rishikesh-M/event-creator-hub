@@ -30,6 +30,10 @@ interface Registration {
   phone: string;
   created_at: string;
   form_data: any;
+  ticket_token: string;
+  check_in_status: boolean;
+  check_in_time: string | null;
+  image_url: string | null;
 }
 
 const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe'];
@@ -40,15 +44,18 @@ export default function Registrations() {
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState<Event | null>(null);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
-  const [encryptionKey, setEncryptionKey] = useState("");
-  const [showKeyInput, setShowKeyInput] = useState(true);
+  const [filteredRegistrations, setFilteredRegistrations] = useState<Registration[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
-    loadEventData();
+    loadData();
   }, [eventId]);
 
-  const loadEventData = async () => {
+  const loadData = async () => {
+    setLoading(true);
     try {
+      // Load event
       const { data: eventData, error: eventError } = await supabase
         .from("events")
         .select("*")
@@ -57,36 +64,19 @@ export default function Registrations() {
 
       if (eventError) throw eventError;
       setEvent(eventData);
-    } catch (error: any) {
-      console.error("Error loading event:", error);
-      toast.error("Failed to load event");
-      navigate("/dashboard");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const loadRegistrations = async () => {
-    if (!encryptionKey) {
-      toast.error("Please enter the encryption key");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.rpc('get_event_registrations', {
-        event_uuid: eventId,
-        encryption_key: encryptionKey
+      // Load registrations using auto function (no encryption key needed)
+      const { data: regsData, error: regsError } = await supabase.rpc('get_event_registrations_auto', {
+        event_uuid: eventId
       });
 
-      if (error) throw error;
-
-      setRegistrations(data || []);
-      setShowKeyInput(false);
-      toast.success(`Loaded ${data?.length || 0} registrations`);
+      if (regsError) throw regsError;
+      setRegistrations(regsData || []);
+      toast.success(`Loaded ${regsData?.length || 0} registrations`);
     } catch (error: any) {
-      console.error("Error loading registrations:", error);
-      toast.error("Failed to load registrations. Check your encryption key.");
+      console.error("Error loading data:", error);
+      toast.error("Failed to load data");
+      navigate("/dashboard");
     } finally {
       setLoading(false);
     }

@@ -24,6 +24,7 @@ export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
     phone: "",
     image_url: ""
   });
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
 
   const handleRegistrationSubmit = async (e: React.FormEvent) => {
@@ -33,19 +34,20 @@ export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
     try {
       const { error } = await supabase.functions.invoke('submit-registration', {
         body: {
-          event_id: event.id,
-          full_name: registrationForm.full_name,
+          eventId: event.id,
+          fullName: registrationForm.full_name,
           email: registrationForm.email,
           phone: registrationForm.phone,
-          image_url: registrationForm.image_url,
-          form_data: {}
+          imageUrl: registrationForm.image_url,
+          formData: customFieldValues
         }
       });
 
       if (error) throw error;
 
-      toast.success("Registration submitted successfully!");
+      toast.success("Registration submitted successfully! Check your email for your ticket.");
       setRegistrationForm({ full_name: "", email: "", phone: "", image_url: "" });
+      setCustomFieldValues({});
     } catch (error: any) {
       console.error("Error submitting registration:", error);
       toast.error("Failed to submit registration");

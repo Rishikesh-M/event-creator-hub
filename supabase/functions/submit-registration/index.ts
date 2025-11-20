@@ -17,109 +17,95 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { event_id, full_name, email, phone, image_url, form_data } = await req.json();
-    const encryptionKey = Deno.env.get('ENCRYPTION_KEY');
+    const registrationData = await req.json();
+    const { eventId, fullName, email, phone, ticketType, formData, imageUrl } = registrationData;
 
-    if (!encryptionKey) {
-      throw new Error('Encryption key not configured');
-    }
+    console.log('Processing registration for event:', eventId);
 
-    // Validate that the event exists and is published
-    const { data: eventData, error: eventError } = await supabase
+    // Get event details and encryption key
+    const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('*')
-      .eq('id', event_id)
+      .select('id, name, is_published, encryption_key, start_date, venue')
+      .eq('id', eventId)
       .single();
 
-    if (eventError || !eventData?.is_published) {
+    if (eventError || !event) {
+      console.error('Event not found:', eventError);
       return new Response(
-        JSON.stringify({ error: 'Event not found or not published' }),
+        JSON.stringify({ error: 'Event not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Encrypt sensitive fields using the database function
-    const { data: encryptedData, error: encryptError } = await supabase.rpc('encrypt_text', {
-      data: JSON.stringify({ full_name, email, phone }),
-      encryption_key: encryptionKey
-    });
-
-    if (encryptError) {
-      console.error('Encryption error:', encryptError);
-      throw new Error('Failed to encrypt data');
+    if (!event.is_published) {
+      return new Response(
+        JSON.stringify({ error: 'Event is not published' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const encrypted = JSON.parse(
-      await supabase.rpc('decrypt_text', { 
-        encrypted_data: encryptedData, 
-        encryption_key: encryptionKey 
-      }).then(r => r.data)
-    );
-
-    // For encryption, we need to call the function for each field
+    // Encrypt sensitive data using event's encryption key
     const { data: encryptedName } = await supabase.rpc('encrypt_text', {
-      data: full_name,
-      encryption_key: encryptionKey
+      data: fullName,
+      encryption_key: event.encryption_key
     });
 
     const { data: encryptedEmail } = await supabase.rpc('encrypt_text', {
       data: email,
-      encryption_key: encryptionKey
+      encryption_key: event.encryption_key
     });
 
-    const { data: encryptedPhone } = await supabase.rpc('encrypt_text', {
-      data: phone || '',
-      encryption_key: encryptionKey
-    });
+    const { data: encryptedPhone } = phone ? await supabase.rpc('encrypt_text', {
+      data: phone,
+      encryption_key: event.encryption_key
+    }) : { data: null };
 
-    // Insert encrypted registration
-    const { error: insertError } = await supabase
+    // Insert registration with encrypted data
+    const { data: registration, error: insertError } = await supabase
       .from('registrations')
       .insert({
-        event_id,
+        event_id: eventId,
         full_name: encryptedName,
         email: encryptedEmail,
         phone: encryptedPhone,
-        image_url: image_url || null,
-        payment_status: 'pending',
-        form_data: form_data || {}
-      });
+        ticket_type: ticketType,
+        payment_status: 'completed',
+        form_data: formData || {},
+        image_url: imageUrl
+      })
+      .select()
+      .single();
 
     if (insertError) {
-      console.error('Insert error:', insertError);
-      throw insertError;
+      console.error('Failed to create registration:', insertError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to create registration' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Send confirmation email (don't fail registration if email fails)
-    try {
-      const emailResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-registration-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
-        },
-        body: JSON.stringify({
-          email: email,
-          name: full_name,
-          eventName: eventData.name,
-          eventDate: eventData.start_date,
-          eventVenue: eventData.venue
-        })
-      });
+    console.log('Registration created successfully:', registration.id);
 
-      if (!emailResponse.ok) {
-        console.error('Failed to send confirmation email, but registration succeeded');
-      } else {
-        console.log('Confirmation email sent successfully');
+    // Send confirmation email asynchronously (don't wait for it)
+    supabase.functions.invoke('send-registration-email', {
+      body: {
+        email,
+        fullName,
+        eventName: event.name,
+        ticketToken: registration.ticket_token,
+        eventId,
+        eventDate: event.start_date,
+        eventVenue: event.venue
       }
-    } catch (emailError) {
-      console.error('Error sending confirmation email:', emailError);
-      // Don't fail the registration if email fails
-    }
+    }).catch(err => console.error('Email sending failed:', err));
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Registration submitted successfully' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        success: true, 
+        registrationId: registration.id,
+        ticketToken: registration.ticket_token
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error: any) {

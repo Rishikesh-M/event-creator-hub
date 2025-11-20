@@ -10,10 +10,12 @@ import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { defaultSections } from "@/lib/themes";
 import { ImageUpload } from "@/components/ImageUpload";
+import { CustomFieldBuilder, type CustomField } from "@/components/CustomFieldBuilder";
 
 const CreateEvent = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -38,7 +40,8 @@ const CreateEvent = () => {
         .insert({
           ...formData,
           user_id: user.id,
-          is_published: false
+          is_published: false,
+          custom_fields: customFields
         })
         .select()
         .single();
