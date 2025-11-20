@@ -42,7 +42,7 @@ const Index = () => {
               </span>
             </h1>
             <p className="mb-8 text-lg text-primary-foreground/90 sm:text-xl max-w-2xl mx-auto">
-              EventSiteCMS empowers anyone to build professional event registration websites with our powerful no-code platform. Design, publish, and manage—all from one dashboard.
+              EventPress empowers anyone to build professional event registration websites with our powerful no-code platform. Design, publish, and manage—all from one dashboard.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 

@@ -88,8 +88,8 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            EventSiteCMS
+          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading">
+            EventPress
           </h1>
           <Button variant="outline" onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />

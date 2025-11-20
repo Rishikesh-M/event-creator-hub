@@ -53,7 +53,7 @@ const Auth = () => {
       return;
     }
 
-    toast.success("Account created! Welcome to EventSiteCMS!");
+    toast.success("Account created! Welcome to EventPress!");
     navigate("/dashboard");
   };
 
@@ -61,8 +61,8 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted to-background p-4">
       <Card className="w-full max-w-md shadow-card animate-scale-in">
         <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            EventSiteCMS
+          <CardTitle className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading">
+            EventPress
           </CardTitle>
           <CardDescription>Create stunning event websites in minutes</CardDescription>
         </CardHeader>
