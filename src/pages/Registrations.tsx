@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Registration {
-  id: string;
+  registration_id: string;
   full_name: string;
   email: string;
   phone: string | null;
@@ -185,8 +185,8 @@ const Registrations = () => {
         <Card>
           <CardHeader>
             <CardTitle>Registrations</CardTitle>
-            <CardDescription>
-              <div className="flex items-center gap-2 mt-2">
+            <div className="mt-2">
+              <div className="flex items-center gap-2">
                 <Search className="h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by name, email, or phone..."
@@ -195,7 +195,7 @@ const Registrations = () => {
                   className="max-w-sm"
                 />
               </div>
-            </CardDescription>
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -219,7 +219,7 @@ const Registrations = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredRegistrations.map((reg) => (
-                      <TableRow key={reg.id}>
+                      <TableRow key={reg.registration_id}>
                         <TableCell className="font-medium">{reg.full_name}</TableCell>
                         <TableCell>{reg.email}</TableCell>
                         <TableCell>{reg.phone || "-"}</TableCell>
@@ -250,7 +250,7 @@ const Registrations = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleCheckIn(reg.id, reg.ticket_token)}
+                              onClick={() => handleCheckIn(reg.registration_id, reg.ticket_token)}
                             >
                               Check In
                             </Button>

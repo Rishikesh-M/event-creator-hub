@@ -166,6 +166,72 @@ export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
                             label="Upload Photo/Document (Optional)"
                             accept="image/*,application/pdf"
                           />
+                          
+                          {/* Render custom fields */}
+                          {event.custom_fields && Array.isArray(event.custom_fields) && event.custom_fields.map((field: any) => (
+                            <div key={field.id}>
+                              <label className="block text-sm font-medium mb-2">
+                                {field.label} {field.required && '*'}
+                              </label>
+                              {field.type === 'text' && (
+                                <Input
+                                  required={field.required}
+                                  value={customFieldValues[field.id] || ''}
+                                  onChange={(e) => setCustomFieldValues({ ...customFieldValues, [field.id]: e.target.value })}
+                                  placeholder={field.placeholder}
+                                />
+                              )}
+                              {field.type === 'textarea' && (
+                                <Textarea
+                                  required={field.required}
+                                  value={customFieldValues[field.id] || ''}
+                                  onChange={(e) => setCustomFieldValues({ ...customFieldValues, [field.id]: e.target.value })}
+                                  placeholder={field.placeholder}
+                                />
+                              )}
+                              {field.type === 'select' && (
+                                <select
+                                  required={field.required}
+                                  value={customFieldValues[field.id] || ''}
+                                  onChange={(e) => setCustomFieldValues({ ...customFieldValues, [field.id]: e.target.value })}
+                                  className="w-full p-2 border rounded-md"
+                                >
+                                  <option value="">Select an option</option>
+                                  {field.options?.map((opt: string) => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                  ))}
+                                </select>
+                              )}
+                              {field.type === 'checkbox' && (
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    required={field.required}
+                                    checked={customFieldValues[field.id] || false}
+                                    onChange={(e) => setCustomFieldValues({ ...customFieldValues, [field.id]: e.target.checked })}
+                                  />
+                                  <span className="text-sm">{field.placeholder}</span>
+                                </div>
+                              )}
+                              {field.type === 'radio' && (
+                                <div className="space-y-2">
+                                  {field.options?.map((opt: string) => (
+                                    <div key={opt} className="flex items-center gap-2">
+                                      <input
+                                        type="radio"
+                                        name={field.id}
+                                        required={field.required}
+                                        checked={customFieldValues[field.id] === opt}
+                                        onChange={() => setCustomFieldValues({ ...customFieldValues, [field.id]: opt })}
+                                      />
+                                      <span className="text-sm">{opt}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          
                           <Button type="submit" className="w-full" disabled={submitting}>
                             {submitting ? "Submitting..." : "Register Now"}
                           </Button>
