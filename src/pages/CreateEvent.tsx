@@ -34,6 +34,11 @@ const CreateEvent = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Generate encryption key
+      const encryptionKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+
       // Create event
       const { data: event, error: eventError } = await supabase
         .from("events")
@@ -41,7 +46,8 @@ const CreateEvent = () => {
           ...formData,
           user_id: user.id,
           is_published: false,
-          custom_fields: customFields as any
+          custom_fields: customFields as any,
+          encryption_key: encryptionKey
         }])
         .select()
         .single();
