@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { defaultSections } from "@/lib/themes";
+import { ImageUpload } from "@/components/ImageUpload";
 
 const CreateEvent = () => {
   const navigate = useNavigate();
@@ -170,16 +171,13 @@ const CreateEvent = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="banner_url">Banner Image URL</Label>
-                <Input
-                  id="banner_url"
-                  type="url"
-                  value={formData.banner_url}
-                  onChange={(e) => setFormData({ ...formData, banner_url: e.target.value })}
-                  placeholder="https://example.com/banner.jpg"
-                />
-              </div>
+              <ImageUpload
+                bucket="event-banners"
+                folder="banners/"
+                currentImage={formData.banner_url}
+                onUploadComplete={(url) => setFormData({ ...formData, banner_url: url })}
+                label="Event Banner Image"
+              />
 
               <div className="flex gap-4">
                 <Button type="button" variant="outline" onClick={() => navigate("/dashboard")} className="flex-1">

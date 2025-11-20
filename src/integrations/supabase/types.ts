@@ -142,6 +142,7 @@ export type Database = {
           form_data: Json | null
           full_name: string
           id: string
+          image_url: string | null
           payment_id: string | null
           payment_status: string | null
           phone: string | null
@@ -154,6 +155,7 @@ export type Database = {
           form_data?: Json | null
           full_name: string
           id?: string
+          image_url?: string | null
           payment_id?: string | null
           payment_status?: string | null
           phone?: string | null
@@ -166,6 +168,7 @@ export type Database = {
           form_data?: Json | null
           full_name?: string
           id?: string
+          image_url?: string | null
           payment_id?: string | null
           payment_status?: string | null
           phone?: string | null

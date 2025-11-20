@@ -17,7 +17,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { event_id, full_name, email, phone, form_data } = await req.json();
+    const { event_id, full_name, email, phone, image_url, form_data } = await req.json();
     const encryptionKey = Deno.env.get('ENCRYPTION_KEY');
 
     if (!encryptionKey) {
@@ -80,6 +80,7 @@ serve(async (req) => {
         full_name: encryptedName,
         email: encryptedEmail,
         phone: encryptedPhone,
+        image_url: image_url || null,
         payment_status: 'pending',
         form_data: form_data || {}
       });

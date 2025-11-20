@@ -7,6 +7,7 @@ import { themes } from "@/lib/themes";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { ImageUpload } from "@/components/ImageUpload";
 
 interface Props {
   event: Event;
@@ -20,7 +21,8 @@ export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
   const [registrationForm, setRegistrationForm] = useState({
     full_name: "",
     email: "",
-    phone: ""
+    phone: "",
+    image_url: ""
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -35,6 +37,7 @@ export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
           full_name: registrationForm.full_name,
           email: registrationForm.email,
           phone: registrationForm.phone,
+          image_url: registrationForm.image_url,
           form_data: {}
         }
       });
@@ -42,7 +45,7 @@ export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
       if (error) throw error;
 
       toast.success("Registration submitted successfully!");
-      setRegistrationForm({ full_name: "", email: "", phone: "" });
+      setRegistrationForm({ full_name: "", email: "", phone: "", image_url: "" });
     } catch (error: any) {
       console.error("Error submitting registration:", error);
       toast.error("Failed to submit registration");
@@ -153,37 +156,37 @@ export const EventPreview = ({ event, site, isPublicView = false }: Props) => {
                               placeholder="Enter your phone number"
                             />
                           </div>
-                          {(section.content.fields || []).map((field: any, i: number) => (
-                            <div key={i}>
-                              <label className="block text-sm font-medium mb-2">
-                                {field.label} {field.required && "*"}
-                              </label>
-                              {field.type === "textarea" ? (
-                                <Textarea placeholder={field.placeholder || ""} />
-                              ) : (
-                                <Input type={field.type || "text"} placeholder={field.placeholder || ""} />
-                              )}
-                            </div>
-                          ))}
+                          <ImageUpload
+                            bucket="registration-uploads"
+                            folder={`${event.id}/`}
+                            currentImage={registrationForm.image_url}
+                            onUploadComplete={(url) => setRegistrationForm({ ...registrationForm, image_url: url })}
+                            label="Upload Photo/Document (Optional)"
+                            accept="image/*,application/pdf"
+                          />
                           <Button type="submit" className="w-full" disabled={submitting}>
                             {submitting ? "Submitting..." : "Register Now"}
                           </Button>
                         </form>
                       ) : (
                         <div className="space-y-4">
-                          {(section.content.fields || []).map((field: any, i: number) => (
-                            <div key={i}>
-                              <label className="block text-sm font-medium mb-2">
-                                {field.label} {field.required && "*"}
-                              </label>
-                              <input
-                                type={field.type || "text"}
-                                placeholder={field.placeholder || ""}
-                                className="w-full px-3 py-2 border rounded-md"
-                                disabled
-                              />
-                            </div>
-                          ))}
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Full Name *</label>
+                            <Input disabled placeholder="Enter your full name" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Email *</label>
+                            <Input disabled type="email" placeholder="Enter your email" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Phone</label>
+                            <Input disabled placeholder="Enter your phone number" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Upload Photo/Document (Optional)</label>
+                            <Input disabled type="file" />
+                          </div>
+                          <Button disabled className="w-full">Register Now</Button>
                           <p className="text-center text-sm text-muted-foreground">
                             Registration form preview - functional on published site
                           </p>
