@@ -10,11 +10,39 @@ const corsHeaders = {
 
 interface RegistrationEmailRequest {
   email: string;
-  name: string;
+  fullName: string;
   eventName: string;
-  eventDate: string;
+  ticketToken: string;
+  eventId: string;
+  eventDate?: string;
   eventVenue?: string;
 }
+
+// Generate iCalendar (.ics) content
+const generateICS = (eventName: string, eventDate: string, eventVenue: string) => {
+  const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const startDate = new Date(eventDate).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const endDate = new Date(new Date(eventDate).getTime() + 2 * 60 * 60 * 1000)
+    .toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+  return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//EventSite CMS//Event Registration//EN
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:${crypto.randomUUID()}@eventsitecms.com
+DTSTAMP:${now}
+DTSTART:${startDate}
+DTEND:${endDate}
+SUMMARY:${eventName}
+LOCATION:${eventVenue || 'TBD'}
+DESCRIPTION:You are registered for ${eventName}
+STATUS:CONFIRMED
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR`;
+};
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
@@ -23,9 +51,27 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, name, eventName, eventDate, eventVenue }: RegistrationEmailRequest = await req.json();
+    const { email, fullName, eventName, ticketToken, eventDate, eventVenue }: RegistrationEmailRequest = await req.json();
 
-    console.log("Sending registration confirmation email to:", email);
+    console.log(`Sending registration email to ${email} for event: ${eventName}`);
+
+    // Generate QR code URL
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${ticketToken}`;
+
+    // Prepare attachments
+    const attachments: any[] = [];
+    
+    // Add calendar invite if event date is provided
+    if (eventDate) {
+      const icsContent = generateICS(eventName, eventDate, eventVenue || '');
+      const encoder = new TextEncoder();
+      const data = encoder.encode(icsContent);
+      const base64 = btoa(String.fromCharCode(...data));
+      attachments.push({
+        filename: 'event-invite.ics',
+        content: base64,
+      });
+    }
 
     const emailResponse = await resend.emails.send({
       from: "EventSiteCMS <onboarding@resend.dev>",

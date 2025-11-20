@@ -66,7 +66,9 @@ export type Database = {
         Row: {
           banner_url: string | null
           created_at: string | null
+          custom_fields: Json | null
           description: string | null
+          encryption_key: string
           end_date: string | null
           id: string
           is_published: boolean | null
@@ -80,7 +82,9 @@ export type Database = {
         Insert: {
           banner_url?: string | null
           created_at?: string | null
+          custom_fields?: Json | null
           description?: string | null
+          encryption_key: string
           end_date?: string | null
           id?: string
           is_published?: boolean | null
@@ -94,7 +98,9 @@ export type Database = {
         Update: {
           banner_url?: string | null
           created_at?: string | null
+          custom_fields?: Json | null
           description?: string | null
+          encryption_key?: string
           end_date?: string | null
           id?: string
           is_published?: boolean | null
@@ -136,6 +142,8 @@ export type Database = {
       }
       registrations: {
         Row: {
+          check_in_status: boolean | null
+          check_in_time: string | null
           created_at: string | null
           email: string
           event_id: string
@@ -146,9 +154,12 @@ export type Database = {
           payment_id: string | null
           payment_status: string | null
           phone: string | null
+          ticket_token: string | null
           ticket_type: string | null
         }
         Insert: {
+          check_in_status?: boolean | null
+          check_in_time?: string | null
           created_at?: string | null
           email: string
           event_id: string
@@ -159,9 +170,12 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           phone?: string | null
+          ticket_token?: string | null
           ticket_type?: string | null
         }
         Update: {
+          check_in_status?: boolean | null
+          check_in_time?: string | null
           created_at?: string | null
           email?: string
           event_id?: string
@@ -172,6 +186,7 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           phone?: string | null
+          ticket_token?: string | null
           ticket_type?: string | null
         }
         Relationships: [
@@ -237,6 +252,10 @@ export type Database = {
       }
     }
     Functions: {
+      check_in_registrant: {
+        Args: { event_uuid: string; ticket_token_input: string }
+        Returns: Json
+      }
       decrypt_text: {
         Args: { encrypted_data: string; encryption_key: string }
         Returns: string
@@ -257,6 +276,25 @@ export type Database = {
           payment_id: string
           payment_status: string
           phone: string
+          ticket_type: string
+        }[]
+      }
+      get_event_registrations_auto: {
+        Args: { event_uuid: string }
+        Returns: {
+          check_in_status: boolean
+          check_in_time: string
+          created_at: string
+          email: string
+          event_id: string
+          form_data: Json
+          full_name: string
+          id: string
+          image_url: string
+          payment_id: string
+          payment_status: string
+          phone: string
+          ticket_token: string
           ticket_type: string
         }[]
       }
