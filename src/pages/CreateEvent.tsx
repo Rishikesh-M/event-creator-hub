@@ -37,12 +37,12 @@ const CreateEvent = () => {
       // Create event
       const { data: event, error: eventError } = await supabase
         .from("events")
-        .insert({
+        .insert([{
           ...formData,
           user_id: user.id,
           is_published: false,
-          custom_fields: customFields
-        })
+          custom_fields: customFields as any
+        }])
         .select()
         .single();
 

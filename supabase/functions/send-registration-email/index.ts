@@ -137,9 +137,11 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="detail-row">
                   <span class="label">Event:</span> ${eventName}
                 </div>
+                ${eventDate ? `
                 <div class="detail-row">
                   <span class="label">Date:</span> ${new Date(eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
+                ` : ''}
                 ${eventVenue ? `
                 <div class="detail-row">
                   <span class="label">Venue:</span> ${eventVenue}
