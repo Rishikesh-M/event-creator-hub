@@ -4,11 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Search, QrCode, CheckCircle2, Circle } from "lucide-react";
+import { Download, Search, QrCode, CheckCircle2, Circle, Users } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CommunicationHub } from "@/components/CommunicationHub";
+import { AppHeader } from "@/components/AppHeader";
+import { StatsCard } from "@/components/StatsCard";
 
 interface Registration {
   registration_id: string;
@@ -133,70 +137,61 @@ const Registrations = () => {
   const checkedInCount = registrations.filter((r) => r.check_in_status).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+      <AppHeader showBackButton title={eventName} />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">{eventName}</h1>
-            <p className="text-muted-foreground">Manage registrations and check-ins</p>
+            <h1 className="text-4xl font-bold font-heading">{eventName}</h1>
+            <p className="text-muted-foreground text-lg mt-2">Manage registrations, check-ins, and communications</p>
           </div>
-          <Button onClick={exportToCSV} disabled={filteredRegistrations.length === 0}>
-            <Download className="mr-2 h-4 w-4" />
+          <Button onClick={exportToCSV} disabled={filteredRegistrations.length === 0} size="lg" className="gap-2">
+            <Download className="h-4 w-4" />
             Export CSV
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{registrations.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Checked In</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{checkedInCount}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Pending Check-in</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{registrations.length - checkedInCount}</div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <StatsCard
+            title="Total Registrations"
+            value={registrations.length}
+            icon={Users}
+          />
+          <StatsCard
+            title="Checked In"
+            value={checkedInCount}
+            icon={CheckCircle2}
+          />
+          <StatsCard
+            title="Pending Check-in"
+            value={registrations.length - checkedInCount}
+            icon={Circle}
+          />
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Registrations</CardTitle>
-            <div className="mt-2">
-              <div className="flex items-center gap-2">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name, email, or phone..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="max-w-sm"
-                />
-              </div>
-            </div>
-          </CardHeader>
+        <Tabs defaultValue="registrations" className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="registrations">Registrations</TabsTrigger>
+            <TabsTrigger value="communications">Communications</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="registrations" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Registrations</CardTitle>
+                <div className="mt-2">
+                  <div className="flex items-center gap-2">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name, email, or phone..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="max-w-sm"
+                    />
+                  </div>
+                </div>
+              </CardHeader>
           <CardContent>
             {loading ? (
               <div className="text-center py-8">Loading registrations...</div>
@@ -264,6 +259,12 @@ const Registrations = () => {
             )}
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="communications">
+            <CommunicationHub eventId={eventId!} eventName={eventName} />
+          </TabsContent>
+        </Tabs>
       </main>
 
       <Dialog open={!!selectedQR} onOpenChange={() => setSelectedQR(null)}>

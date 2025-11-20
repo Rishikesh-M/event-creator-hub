@@ -5,17 +5,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { defaultSections } from "@/lib/themes";
 import { ImageUpload } from "@/components/ImageUpload";
 import { CustomFieldBuilder, type CustomField } from "@/components/CustomFieldBuilder";
+import { TicketTierBuilder } from "@/components/TicketTierBuilder";
+import { TicketTier } from "@/types/event";
+import { AppHeader } from "@/components/AppHeader";
 
 const CreateEvent = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [ticketTiers, setTicketTiers] = useState<TicketTier[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -23,7 +28,9 @@ const CreateEvent = () => {
     start_date: "",
     end_date: "",
     venue: "",
-    banner_url: ""
+    banner_url: "",
+    capacity: undefined as number | undefined,
+    waitlist_enabled: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,7 +54,8 @@ const CreateEvent = () => {
           user_id: user.id,
           is_published: false,
           custom_fields: customFields as any,
-          encryption_key: encryptionKey
+          encryption_key: encryptionKey,
+          ticket_tiers: ticketTiers as any,
         }])
         .select()
         .single();
@@ -85,22 +93,15 @@ const CreateEvent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+      <AppHeader showBackButton title="Create New Event" />
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
         <Card className="shadow-card animate-scale-in">
           <CardHeader>
-            <CardTitle className="text-2xl">Create New Event</CardTitle>
-            <CardDescription>
-              Fill in the details to create your event website
+            <CardTitle className="text-3xl font-heading">Create New Event</CardTitle>
+            <CardDescription className="text-base">
+              Fill in the details to create your professional event website
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -180,6 +181,38 @@ const CreateEvent = () => {
                 />
               </div>
 
+              <div className="space-y-4 border-t pt-6">
+                <h3 className="text-lg font-semibold font-heading">Capacity & Ticketing</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="capacity">Event Capacity</Label>
+                    <Input
+                      id="capacity"
+                      type="number"
+                      min="0"
+                      value={formData.capacity || ""}
+                      onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || undefined })}
+                      placeholder="Unlimited"
+                    />
+                  </div>
+                  <div className="flex items-end pb-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="waitlist"
+                        checked={formData.waitlist_enabled}
+                        onCheckedChange={(checked) => setFormData({ ...formData, waitlist_enabled: checked as boolean })}
+                      />
+                      <Label htmlFor="waitlist" className="text-sm font-normal cursor-pointer">
+                        Enable waitlist when full
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
+                <TicketTierBuilder tiers={ticketTiers} onChange={setTicketTiers} />
+              </div>
+
               <ImageUpload
                 bucket="event-banners"
                 folder="banners/"
@@ -187,6 +220,10 @@ const CreateEvent = () => {
                 onUploadComplete={(url) => setFormData({ ...formData, banner_url: url })}
                 label="Event Banner Image"
               />
+
+              <div className="border-t pt-6">
+                <CustomFieldBuilder fields={customFields} onChange={setCustomFields} />
+              </div>
 
               <div className="flex gap-4">
                 <Button type="button" variant="outline" onClick={() => navigate("/dashboard")} className="flex-1">
