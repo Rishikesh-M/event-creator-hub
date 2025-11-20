@@ -13,6 +13,40 @@ export interface Event {
   updated_at: string;
   custom_fields?: any;
   encryption_key?: string;
+  capacity?: number;
+  waitlist_enabled?: boolean;
+  ticket_tiers?: any; // Json from Supabase
+}
+
+export interface TicketTier {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  quantity?: number;
+  sold?: number;
+  available_from?: string;
+  available_until?: string;
+}
+
+export interface EventTemplate {
+  id: string;
+  user_id: string;
+  name: string;
+  description?: string;
+  template_data: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventAnnouncement {
+  id: string;
+  event_id: string;
+  subject: string;
+  message: string;
+  sent_at?: string;
+  sent_to_count: number;
+  created_at: string;
 }
 
 export interface EventSite {

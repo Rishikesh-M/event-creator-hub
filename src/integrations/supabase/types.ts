@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      event_announcements: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          message: string
+          sent_at: string | null
+          sent_to_count: number | null
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          message: string
+          sent_at?: string | null
+          sent_to_count?: number | null
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          message?: string
+          sent_at?: string | null
+          sent_to_count?: number | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_announcements_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_announcements_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_sites: {
         Row: {
           config: Json | null
@@ -62,9 +107,40 @@ export type Database = {
           },
         ]
       }
+      event_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          template_data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          template_data?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          template_data?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           banner_url: string | null
+          capacity: number | null
           created_at: string | null
           custom_fields: Json | null
           description: string | null
@@ -75,12 +151,15 @@ export type Database = {
           name: string
           slug: string
           start_date: string
+          ticket_tiers: Json | null
           updated_at: string | null
           user_id: string
           venue: string | null
+          waitlist_enabled: boolean | null
         }
         Insert: {
           banner_url?: string | null
+          capacity?: number | null
           created_at?: string | null
           custom_fields?: Json | null
           description?: string | null
@@ -91,12 +170,15 @@ export type Database = {
           name: string
           slug: string
           start_date: string
+          ticket_tiers?: Json | null
           updated_at?: string | null
           user_id: string
           venue?: string | null
+          waitlist_enabled?: boolean | null
         }
         Update: {
           banner_url?: string | null
+          capacity?: number | null
           created_at?: string | null
           custom_fields?: Json | null
           description?: string | null
@@ -107,9 +189,11 @@ export type Database = {
           name?: string
           slug?: string
           start_date?: string
+          ticket_tiers?: Json | null
           updated_at?: string | null
           user_id?: string
           venue?: string | null
+          waitlist_enabled?: boolean | null
         }
         Relationships: []
       }
@@ -154,6 +238,8 @@ export type Database = {
           payment_id: string | null
           payment_status: string | null
           phone: string | null
+          ticket_price: number | null
+          ticket_tier_id: string | null
           ticket_token: string | null
           ticket_type: string | null
         }
@@ -170,6 +256,8 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           phone?: string | null
+          ticket_price?: number | null
+          ticket_tier_id?: string | null
           ticket_token?: string | null
           ticket_type?: string | null
         }
@@ -186,6 +274,8 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           phone?: string | null
+          ticket_price?: number | null
+          ticket_tier_id?: string | null
           ticket_token?: string | null
           ticket_type?: string | null
         }
